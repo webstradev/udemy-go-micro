@@ -1,7 +1,7 @@
 package main
 
 import (
-	"authentication-service/cmd/api/data"
+	"authentication/data"
 	"database/sql"
 	"fmt"
 	"log"
@@ -23,29 +23,26 @@ type Config struct {
 func main() {
 	log.Println("Starting authentication service")
 
-	// connect to database
 	conn, err := openDB()
 	if err != nil {
 		log.Panic(err)
 	}
 
-	app := &Config{
+	// set up config
+	app := Config{
 		DB:     conn,
 		Models: data.New(conn),
 	}
 
-	// define http server
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", webPort),
 		Handler: app.routes(),
 	}
 
-	// start the server
 	err = srv.ListenAndServe()
 	if err != nil {
 		log.Panic(err)
 	}
-
 }
 
 func openDB() (*sql.DB, error) {
