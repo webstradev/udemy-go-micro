@@ -12,3 +12,39 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+
+  postgres:
+    image: postgres:14.2
+    ports:
+      - "5432:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+    volumes: 
+      - /db-data/postgres/:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U "$$Postgres_USER" -d "$$Postgres_DB"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  authentication-service:
+    depends_on:
+        postgres:
+          condition: service_healthy
+    build:
+      context: ./../authentication-service
+      dockerfile: ./../authentication-service/authentication-service.dockerfile
+    restart: always
+    ports:
+      - "8081:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DSN: "host=postgres user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=10"
