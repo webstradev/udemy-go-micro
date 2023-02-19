@@ -40,7 +40,7 @@ build_front:
 	cd ../front-end && env CGO_ENABLED=0 go build -o ${FRONT_END_BINARY} ./cmd/web
 	@echo "Done!"
 
-## start: starts the front end
+## start: starts the front en	d
 start: build_front
 	@echo "Starting front end"
 	cd ../front-end && ./${FRONT_END_BINARY} &
