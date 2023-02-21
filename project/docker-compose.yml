@@ -73,6 +73,9 @@ services:
       replicas: 1 
     
   broker-service:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     build:
       context: ./../broker-service
       dockerfile: ./../broker-service/broker-service.dockerfile
@@ -82,6 +85,10 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
   
   mailhog:
     image: mailhog/mailhog:latest
@@ -110,3 +117,39 @@ services:
       MAIL_ENCRYPTION: none
       MAIL_FROM_NAME: "Mailer Service"
       MAIL_FROM_ADDRESS: "mailer@localhost"
+    
+  rabbitmq:
+    image: 'rabbitmq:3.9-alpine'
+    ports:
+      - "5672:5672"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - /db-data/rabbitmq/:/var/lib/rabbitmq/
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 10s
+      retries: 5
+  
+  listener-service:
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    build:
+      context: ./../listener-service
+      dockerfile: ./../listener-service/listener-service.dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+
