@@ -45,7 +45,8 @@ func main() {
 		Models: data.New(client),
 	}
 
-	go app.serve()
+	log.Println("Starting service on port ", webPort)
+	app.serve()
 }
 
 func (app *Config) serve() {

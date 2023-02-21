@@ -2,17 +2,6 @@ version: '3'
 
 services:
 
-  broker-service:
-    build:
-      context: ./../broker-service
-      dockerfile: ./../broker-service/broker-service.dockerfile
-    restart: always
-    ports:
-      - "8080:80"
-    deploy:
-      mode: replicated
-      replicas: 1
-
   postgres:
     image: 'postgres:14.2'
     ports:
@@ -29,9 +18,10 @@ services:
       - /db-data/postgres/:/var/lib/postgresql/data/
     healthcheck:
       test: pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 5s
 
   authentication-service:
     depends_on:
@@ -52,7 +42,7 @@ services:
   mongo:
     image: 'mongo:4.2.16-bionic'
     ports:
-      - "27017:27017"
+      - "27019:27017"
     restart: always
     deploy:
       mode: replicated
@@ -63,3 +53,32 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
       - /db-data/mongo/:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/logs --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  logger-service:
+    depends_on:
+      mongo:
+        condition: service_healthy
+    build:
+      context: ./../logger-service
+      dockerfile: ./../logger-service/logger-service.dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1 
+    
+  broker-service:
+    build:
+      context: ./../broker-service
+      dockerfile: ./../broker-service/broker-service.dockerfile
+    restart: always
+    ports:
+      - "8080:80"
+    deploy:
+      mode: replicated
+      replicas: 1
