@@ -1,0 +1,5 @@
+db-data/
+caddy_data/
+caddy_config/
+docker-compose.yml
+Makefile
