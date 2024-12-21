@@ -1,6 +1,6 @@
 module mail-service
 
-go 1.20
+go 1.23
 
 require (
 	github.com/go-chi/chi/v5 v5.0.8
@@ -16,5 +16,5 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/toorop/go-dkim v0.0.0-20201103131630-e1cd1a0a5208 // indirect
 	github.com/vanng822/css v1.0.1 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 )
